@@ -17,15 +17,16 @@ class UserResponse(BaseModel):
 class WorkoutCreate(BaseModel):
     day_of_week:str
     name:str
-    exercises:list[str]
+    workout_exercises:list[str]
 class WorkoutUpdate(BaseModel):
     day_of_week:str
     name:str
-    exercises:list[str]
+    workout_exercises:list[str]
 class WorkoutResponse(BaseModel):
+    id:int
     day_of_week:str
     name:str
-    exercises:list[str]
+    workout_exercises:list[str]
 
 
 class MarkWorkoutComplete(BaseModel):

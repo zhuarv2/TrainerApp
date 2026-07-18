@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, Date, Boolean, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-from sqlalchemy.exc import IntegrityError   
 
 engine = create_engine('sqlite:///backend/database.db', echo=True)
 Base = declarative_base()
