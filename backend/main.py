@@ -1,10 +1,8 @@
-from schemas import UserCreate
-from crud import create_user
+from fastapi import FastAPI
+from backend.routes import auth, history, workouts
 
-user = UserCreate(
-    username="admin",
-    email="admin@workout.id",
-    password="admin123"
-)
+app = FastAPI()
 
-create_user(user)
+app.include_router(auth.router)
+app.include_router(workouts.router)
+app.include_router(history.router)

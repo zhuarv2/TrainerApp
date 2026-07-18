@@ -1,10 +1,10 @@
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError   
 from datetime import date
-from models import User, WorkoutPlan, WorkoutExercise, WorkoutHistory
-from database import SessionLocal
-from auth import hash_password, verify_password
-from schemas import UserCreate, UserLogin, WorkoutCreate, WorkoutUpdate, MarkWorkoutComplete
+from backend.models import User, WorkoutPlan, WorkoutExercise, WorkoutHistory
+from backend.database import SessionLocal
+from backend.auth import hash_password, verify_password
+from backend.schemas import UserCreate, UserLogin, WorkoutCreate, WorkoutUpdate, MarkWorkoutComplete
 
 def create_exercise_objects(exercises: list[str]) -> list[WorkoutExercise]:
     exercise_objects = []
@@ -84,6 +84,7 @@ def update_workout(user_id:int, workout_id:int, updated_workout: WorkoutUpdate):
         workout = session.query(WorkoutPlan).filter(WorkoutPlan.user_id == user_id, WorkoutPlan.id==workout_id).first()
         if workout is None:
             return None
+        workout.day_of_week = updated_workout.day_of_week
         workout.name = updated_workout.name
         exercise_objects = create_exercise_objects(updated_workout.exercises)
         workout.workout_exercises = exercise_objects
@@ -106,7 +107,6 @@ def get_today_workout(user_id:int):
             return None
         return workout_plan
     except Exception:
-        session.rollback()
         raise
     finally:
         session.close()
@@ -117,7 +117,6 @@ def get_all_workouts(user_id:int):
         workout_plan = session.query(WorkoutPlan).filter(WorkoutPlan.user_id==user_id).all()
         return workout_plan
     except Exception:
-        session.rollback()
         raise
     finally:
         session.close()
@@ -130,7 +129,6 @@ def get_workout_by_id(user_id:int,workout_id:int):
             return None
         return workout_plan
     except Exception:
-        session.rollback()
         raise
     finally:
         session.close()
@@ -168,7 +166,16 @@ def get_history(user_id:int):
         workout = session.query(WorkoutHistory).filter(WorkoutHistory.user_id==user_id).all()
         return workout
     except Exception:
-        session.rollback()
+        raise
+    finally:
+        session.close()
+
+def get_history_by_date(user_id:int, date:date):
+    session = SessionLocal()
+    try:
+        workout = session.query(WorkoutHistory).filter(WorkoutHistory.user_id==user_id, WorkoutHistory.date==date).all()
+        return workout
+    except Exception:
         raise
     finally:
         session.close()

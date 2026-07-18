@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import date as Date
 
 class UserCreate(BaseModel):
@@ -12,6 +12,8 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: EmailStr
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class WorkoutCreate(BaseModel):
@@ -27,6 +29,8 @@ class WorkoutResponse(BaseModel):
     day_of_week:str
     name:str
     workout_exercises:list[str]
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MarkWorkoutComplete(BaseModel):
