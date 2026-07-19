@@ -1,5 +1,5 @@
-from sqlalchemy import delete
-from sqlalchemy.exc import IntegrityError   
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 from datetime import date
 from backend.models import User, WorkoutPlan, WorkoutExercise, WorkoutHistory
 from backend.database import SessionLocal
@@ -15,6 +15,14 @@ def create_exercise_objects(exercises: list[str]) -> list[WorkoutExercise]:
                 order_index=index
             ))
     return exercise_objects
+
+def get_workout_with_exercises(session, workout_id):
+    return (
+        session.query(WorkoutPlan)
+        .options(selectinload(WorkoutPlan.workout_exercises))
+        .filter(WorkoutPlan.id == workout_id)
+        .first()
+    )
 
 def create_user(user: UserCreate):
     session = SessionLocal()
@@ -48,13 +56,13 @@ def login_user(entered_user: UserLogin):
 def create_workout(user_id:int, workout: WorkoutCreate):
     session = SessionLocal()
     try:
-        existing = session.query(WorkoutPlan).filter(
+        existing = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(
             WorkoutPlan.user_id == user_id,
             WorkoutPlan.day_of_week == workout.day_of_week,
         ).first()
         if existing:
             return None
-        exercise_objects = create_exercise_objects(workout.exercises)
+        exercise_objects = create_exercise_objects(workout.workout_exercises)
             
         workout_plan = WorkoutPlan(
             user_id=user_id,
@@ -63,7 +71,7 @@ def create_workout(user_id:int, workout: WorkoutCreate):
             workout_exercises=exercise_objects)
         session.add(workout_plan)
         session.commit()
-        session.refresh(workout_plan)
+        workout_plan = get_workout_with_exercises(session,workout_plan.id)
         return workout_plan
     except Exception:
         session.rollback()
@@ -74,7 +82,7 @@ def create_workout(user_id:int, workout: WorkoutCreate):
 def update_workout(user_id:int, workout_id:int, updated_workout: WorkoutUpdate):
     session = SessionLocal()
     try:
-        existing = session.query(WorkoutPlan).filter(
+        existing = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(
             WorkoutPlan.user_id == user_id,
             WorkoutPlan.day_of_week == updated_workout.day_of_week,
             WorkoutPlan.id != workout_id
@@ -86,10 +94,10 @@ def update_workout(user_id:int, workout_id:int, updated_workout: WorkoutUpdate):
             return None
         workout.day_of_week = updated_workout.day_of_week
         workout.name = updated_workout.name
-        exercise_objects = create_exercise_objects(updated_workout.exercises)
+        exercise_objects = create_exercise_objects(updated_workout.workout_exercises)
         workout.workout_exercises = exercise_objects
         session.commit()
-        session.refresh(workout)
+        workout = get_workout_with_exercises(session, workout_id)
         return workout
 
     except Exception:
@@ -102,7 +110,7 @@ def get_today_workout(user_id:int):
     session = SessionLocal()
     try:
         today = date.today().strftime("%A")
-        workout_plan = session.query(WorkoutPlan).filter(WorkoutPlan.user_id == user_id, WorkoutPlan.day_of_week==today).first()
+        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id == user_id, WorkoutPlan.day_of_week==today).first()
         if workout_plan is None:
             return None
         return workout_plan
@@ -114,7 +122,7 @@ def get_today_workout(user_id:int):
 def get_all_workouts(user_id:int):
     session = SessionLocal()
     try:
-        workout_plan = session.query(WorkoutPlan).filter(WorkoutPlan.user_id==user_id).all()
+        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id==user_id).all()
         return workout_plan
     except Exception:
         raise
@@ -124,7 +132,7 @@ def get_all_workouts(user_id:int):
 def get_workout_by_id(user_id:int,workout_id:int):
     session = SessionLocal()
     try:
-        workout_plan = session.query(WorkoutPlan).filter(WorkoutPlan.user_id==user_id,WorkoutPlan.id==workout_id).first()
+        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id==user_id,WorkoutPlan.id==workout_id).first()
         if workout_plan is None:
             return None
         return workout_plan

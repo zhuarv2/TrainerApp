@@ -24,12 +24,15 @@ class WorkoutUpdate(BaseModel):
     day_of_week:str
     name:str
     workout_exercises:list[str]
+class WorkoutExerciseResponse(BaseModel):
+    exercise:str
+    order_index:int
+    model_config = ConfigDict(from_attributes=True)
 class WorkoutResponse(BaseModel):
     id:int
     day_of_week:str
     name:str
-    workout_exercises:list[str]
-
+    workout_exercises:list[WorkoutExerciseResponse]
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -37,6 +40,5 @@ class MarkWorkoutComplete(BaseModel):
     notes:str | None=None
 class HistoryResponse(BaseModel):
     date:Date
-    name:str
     completed:bool
     notes:str | None
