@@ -46,32 +46,47 @@ async function checkCompletion(workoutId) {
     return;
   }
 
-  area.innerHTML = `
-    <label for="notes-input">Notes (optional)</label>
-    <textarea id="notes-input" rows="2"></textarea>
-    <button id="complete-btn">Mark as Complete</button>
-    <p id="complete-error" class="error-message"></p>
-  `;
-  document.getElementById("complete-btn").addEventListener("click", () => markComplete(workoutId));
+  area.innerHTML = `<button id="complete-btn">Mark as Complete</button>`;
+  document.getElementById("complete-btn").addEventListener("click", () => openCompleteModal(workoutId));
 }
 
-async function markComplete(workoutId) {
-  const btn = document.getElementById("complete-btn");
-  const errorEl = document.getElementById("complete-error");
-  const notes = document.getElementById("notes-input").value.trim();
-  btn.disabled = true;
-  errorEl.textContent = "";
+function openCompleteModal(workoutId) {
+  openModal(
+    `
+      <h2>Mark Workout Complete</h2>
+      <label for="modal-notes">Notes (optional)</label>
+      <textarea id="modal-notes" rows="3" placeholder="How did it go?"></textarea>
+      <p id="modal-error" class="error-message"></p>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" id="modal-cancel">Cancel</button>
+        <button type="button" id="modal-confirm">Confirm</button>
+      </div>
+    `,
+    {
+      onOpen(modal, close) {
+        modal.querySelector("#modal-cancel").addEventListener("click", close);
+        modal.querySelector("#modal-confirm").addEventListener("click", async () => {
+          const confirmBtn = modal.querySelector("#modal-confirm");
+          const errorEl = modal.querySelector("#modal-error");
+          const notes = modal.querySelector("#modal-notes").value.trim();
+          confirmBtn.disabled = true;
+          errorEl.textContent = "";
 
-  try {
-    await apiFetch(`/history/${workoutId}/complete`, {
-      method: "POST",
-      body: JSON.stringify({ notes: notes || null }),
-    });
-    checkCompletion(workoutId);
-  } catch (err) {
-    errorEl.textContent = err.message;
-    btn.disabled = false;
-  }
+          try {
+            await apiFetch(`/history/${workoutId}/complete`, {
+              method: "POST",
+              body: JSON.stringify({ notes: notes || null }),
+            });
+            close();
+            checkCompletion(workoutId);
+          } catch (err) {
+            errorEl.textContent = err.message;
+            confirmBtn.disabled = false;
+          }
+        });
+      },
+    }
+  );
 }
 
 init();

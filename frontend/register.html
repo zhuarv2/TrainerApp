@@ -2,33 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("trainer_app_theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Register · TrainerApp</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ff7a14" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="TrainerApp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="auth-body">
-  <main class="auth-card">
-    <h1 class="brand">🏋️ TrainerApp</h1>
-    <p class="subtitle">Create your account</p>
+  <button id="theme-toggle" class="icon-btn theme-toggle-corner" aria-label="Toggle dark mode">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+  </button>
+  <div class="auth-content">
+    <main class="auth-card">
+      <h1 class="brand"><a href="dashboard.html">TrainerApp</a></h1>
+      <p class="subtitle">Create your account</p>
 
-    <form id="register-form" novalidate>
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required autocomplete="username" />
+      <form id="register-form" novalidate>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username" />
 
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required autocomplete="email" />
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email" />
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required autocomplete="new-password" />
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="new-password" />
 
-      <p id="error-message" class="error-message" role="alert"></p>
-      <p id="success-message" class="success-message" role="status"></p>
+        <p id="error-message" class="error-message" role="alert"></p>
+        <p id="success-message" class="success-message" role="status"></p>
 
-      <button type="submit">Register</button>
-    </form>
+        <button type="submit">Register</button>
+      </form>
 
-    <p class="switch-link">Already have an account? <a href="login.html">Log in</a></p>
-  </main>
+      <p class="switch-link">Already have an account? <a href="login.html">Log in</a></p>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Farouq Hafizhuddin</p>
+  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/register.js"></script>

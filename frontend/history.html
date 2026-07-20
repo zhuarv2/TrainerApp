@@ -2,38 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("trainer_app_theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>History · TrainerApp</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ff7a14" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="TrainerApp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <nav class="topnav">
-    <span class="brand">🏋️ TrainerApp</span>
-    <div class="nav-links">
-      <a href="dashboard.html">Today</a>
-      <a href="planner.html">Planner</a>
-      <a href="history.html" class="active">History</a>
-      <button id="logout-btn" class="link-btn">Logout</button>
+    <a href="dashboard.html" class="brand">TrainerApp</a>
+    <div class="nav-right">
+      <div class="nav-links" id="nav-links">
+        <a href="dashboard.html">Today</a>
+        <a href="planner.html">Planner</a>
+        <a href="history.html" class="active">History</a>
+        <button id="logout-btn" class="link-btn">Logout</button>
+      </div>
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+      <button id="nav-toggle" class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
     </div>
   </nav>
 
   <main class="container">
     <h1>History</h1>
-    <div class="table-wrap">
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Workout</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="history-body">
-          <tr><td colspan="3">Loading…</td></tr>
-        </tbody>
-      </table>
+    <p class="hint">Hover (or tap) a marked day to see the workout and notes.</p>
+    <div class="calendar">
+      <div class="calendar-header">
+        <button id="cal-prev" class="icon-btn" aria-label="Previous month">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 id="cal-label"></h2>
+        <button id="cal-next" class="icon-btn" aria-label="Next month">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+      <div class="calendar-weekdays">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      <div id="calendar-grid" class="calendar-grid">Loading…</div>
     </div>
   </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Farouq Hafizhuddin</p>
+  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/history.js"></script>

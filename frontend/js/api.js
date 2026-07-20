@@ -1,6 +1,20 @@
 const TOKEN_KEY = "trainer_app_token";
+const THEME_KEY = "trainer_app_theme";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function applyTheme(theme) {
+  if (theme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch (e) {
+    // ignore storage failures (e.g. private browsing)
+  }
+}
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -62,7 +76,11 @@ async function apiFetch(path, options = {}) {
     let detail = `Request failed (${res.status})`;
     try {
       const data = await res.json();
-      if (data.detail) detail = data.detail;
+      if (Array.isArray(data.detail)) {
+        detail = data.detail.map((e) => e.msg).filter(Boolean).join(" ") || detail;
+      } else if (typeof data.detail === "string") {
+        detail = data.detail;
+      }
     } catch (e) {
       // response had no JSON body
     }
@@ -74,6 +92,31 @@ async function apiFetch(path, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+function openModal(innerHtml, { onOpen } = {}) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${innerHtml}</div>`;
+  document.body.appendChild(overlay);
+  document.body.classList.add("modal-open");
+
+  const close = () => {
+    overlay.remove();
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", onKeydown);
+  };
+  const onKeydown = (event) => {
+    if (event.key === "Escape") close();
+  };
+  document.addEventListener("keydown", onKeydown);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) close();
+  });
+
+  const modal = overlay.querySelector(".modal");
+  if (onOpen) onOpen(modal, close);
+  return { modal, close };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
@@ -82,4 +125,37 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "login.html";
     });
   }
+
+  const navToggle = document.getElementById("nav-toggle");
+  const navLinks = document.getElementById("nav-links");
+  if (navToggle && navLinks) {
+    navToggle.addEventListener("click", () => {
+      const isOpen = navLinks.classList.toggle("open");
+      navToggle.classList.toggle("open", isOpen);
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+    navLinks.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("open");
+        navToggle.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
+    });
+  }
+
+  const themeToggle = document.getElementById("theme-toggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      applyTheme(isDark ? "light" : "dark");
+    });
+  }
 });
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // offline support is a nice-to-have; ignore registration failures
+    });
+  });
+}

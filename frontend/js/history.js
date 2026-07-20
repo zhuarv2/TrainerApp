@@ -1,43 +1,127 @@
 requireAuth();
 
+let historyByDate = new Map();
+let workoutsByDay = new Map();
+let viewYear;
+let viewMonth;
+let tooltipEl = null;
+
+function ensureTooltip() {
+  if (tooltipEl) return tooltipEl;
+  tooltipEl = document.createElement("div");
+  tooltipEl.className = "day-tooltip";
+  document.body.appendChild(tooltipEl);
+  return tooltipEl;
+}
+
+function showTooltip(cell, workout, entry) {
+  const tooltip = ensureTooltip();
+  const workoutLabel = workout ? escapeHtml(workout.name) : "Workout completed";
+  const notesLabel = entry.notes ? escapeHtml(entry.notes) : "No notes";
+  tooltip.innerHTML = `<strong>${workoutLabel}</strong><span>${notesLabel}</span>`;
+
+  const rect = cell.getBoundingClientRect();
+  tooltip.style.left = `${rect.left + rect.width / 2}px`;
+  tooltip.style.top = `${rect.top}px`;
+  tooltip.classList.add("visible");
+}
+
+function hideTooltip() {
+  if (tooltipEl) tooltipEl.classList.remove("visible");
+}
+
+function dateKeyFor(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function renderCalendar() {
+  const label = document.getElementById("cal-label");
+  const monthName = new Date(viewYear, viewMonth, 1).toLocaleDateString("en-US", { month: "long" });
+  label.textContent = `${monthName} ${viewYear}`;
+
+  const grid = document.getElementById("calendar-grid");
+  grid.innerHTML = "";
+  hideTooltip();
+
+  const jsWeekdayOfFirst = new Date(viewYear, viewMonth, 1).getDay();
+  const leadingBlanks = (jsWeekdayOfFirst + 6) % 7;
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const totalCells = Math.ceil((leadingBlanks + daysInMonth) / 7) * 7;
+  const todayKey = todayISO();
+
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - leadingBlanks + 1;
+    const cell = document.createElement("div");
+    cell.className = "day-cell";
+
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      cell.classList.add("empty");
+      grid.appendChild(cell);
+      continue;
+    }
+
+    const dateKey = dateKeyFor(viewYear, viewMonth, dayNum);
+    cell.textContent = String(dayNum);
+    if (dateKey === todayKey) cell.classList.add("today");
+
+    const entry = historyByDate.get(dateKey);
+    if (entry) {
+      cell.classList.add("completed");
+      cell.setAttribute("tabindex", "0");
+      const weekday = weekdayFromISO(dateKey);
+      const workout = workoutsByDay.get(weekday);
+      cell.addEventListener("mouseenter", () => showTooltip(cell, workout, entry));
+      cell.addEventListener("mouseleave", hideTooltip);
+      cell.addEventListener("focus", () => showTooltip(cell, workout, entry));
+      cell.addEventListener("click", () => showTooltip(cell, workout, entry));
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+function changeMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth < 0) {
+    viewMonth = 11;
+    viewYear -= 1;
+  } else if (viewMonth > 11) {
+    viewMonth = 0;
+    viewYear += 1;
+  }
+  renderCalendar();
+}
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".day-cell")) hideTooltip();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideTooltip();
+});
+
 async function init() {
-  const body = document.getElementById("history-body");
+  const grid = document.getElementById("calendar-grid");
 
   let history;
   let workouts;
   try {
     [history, workouts] = await Promise.all([apiFetch("/history"), apiFetch("/workouts/")]);
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="3" class="error-message">${escapeHtml(err.message)}</td></tr>`;
+    grid.innerHTML = `<p class="error-message">${escapeHtml(err.message)}</p>`;
     return;
   }
 
-  if (history.length === 0) {
-    body.innerHTML = `<tr><td colspan="3">No completed workouts yet.</td></tr>`;
-    return;
-  }
+  historyByDate = new Map(history.map((entry) => [entry.date, entry]));
+  workoutsByDay = new Map(workouts.map((w) => [w.day_of_week, w]));
 
-  const byDay = {};
-  workouts.forEach((w) => {
-    byDay[w.day_of_week] = w;
-  });
+  const now = new Date();
+  viewYear = now.getFullYear();
+  viewMonth = now.getMonth();
 
-  const sorted = [...history].sort((a, b) => b.date.localeCompare(a.date));
+  document.getElementById("cal-prev").addEventListener("click", () => changeMonth(-1));
+  document.getElementById("cal-next").addEventListener("click", () => changeMonth(1));
 
-  body.innerHTML = sorted
-    .map((entry) => {
-      const weekday = weekdayFromISO(entry.date);
-      const workout = byDay[weekday];
-      const workoutLabel = workout ? escapeHtml(workout.name) : `(${weekday})`;
-      return `
-        <tr>
-          <td>${escapeHtml(entry.date)}</td>
-          <td>${workoutLabel}</td>
-          <td>${entry.notes ? escapeHtml(entry.notes) : "&mdash;"}</td>
-        </tr>
-      `;
-    })
-    .join("");
+  renderCalendar();
 }
 
 init();
