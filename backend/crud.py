@@ -170,7 +170,7 @@ def mark_completed(user_id:int, workout_id:int, marked_workout:MarkWorkoutComple
         )
         session.add(history)
         session.commit()
-        session.refresh(history)
+        history = session.query(WorkoutHistory).options(selectinload(WorkoutHistory.workout_plan)).filter(WorkoutHistory.id == history.id).first()
         return history
     except Exception:
         session.rollback()
@@ -181,7 +181,7 @@ def mark_completed(user_id:int, workout_id:int, marked_workout:MarkWorkoutComple
 def get_history(user_id:int):
     session = SessionLocal()
     try:
-        workout = session.query(WorkoutHistory).filter(WorkoutHistory.user_id==user_id).all()
+        workout = session.query(WorkoutHistory).options(selectinload(WorkoutHistory.workout_plan)).filter(WorkoutHistory.user_id==user_id).all()
         return workout
     except Exception:
         raise
@@ -191,7 +191,7 @@ def get_history(user_id:int):
 def get_history_by_date(user_id:int, date:date):
     session = SessionLocal()
     try:
-        workout = session.query(WorkoutHistory).filter(WorkoutHistory.user_id==user_id, WorkoutHistory.date==date).all()
+        workout = session.query(WorkoutHistory).options(selectinload(WorkoutHistory.workout_plan)).filter(WorkoutHistory.user_id==user_id, WorkoutHistory.date==date).all()
         return workout
     except Exception:
         raise

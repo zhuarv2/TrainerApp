@@ -1,7 +1,6 @@
 requireAuth();
 
 let historyByDate = new Map();
-let workoutsByDay = new Map();
 let viewYear;
 let viewMonth;
 let tooltipEl = null;
@@ -14,9 +13,9 @@ function ensureTooltip() {
   return tooltipEl;
 }
 
-function showTooltip(cell, workout, entry) {
+function showTooltip(cell, entry) {
   const tooltip = ensureTooltip();
-  const workoutLabel = workout ? escapeHtml(workout.name) : "Workout completed";
+  const workoutLabel = escapeHtml(entry.workout_name);
   const notesLabel = entry.notes ? escapeHtml(entry.notes) : "No notes";
   tooltip.innerHTML = `<strong>${workoutLabel}</strong><span>${notesLabel}</span>`;
 
@@ -68,12 +67,10 @@ function renderCalendar() {
     if (entry) {
       cell.classList.add("completed");
       cell.setAttribute("tabindex", "0");
-      const weekday = weekdayFromISO(dateKey);
-      const workout = workoutsByDay.get(weekday);
-      cell.addEventListener("mouseenter", () => showTooltip(cell, workout, entry));
+      cell.addEventListener("mouseenter", () => showTooltip(cell, entry));
       cell.addEventListener("mouseleave", hideTooltip);
-      cell.addEventListener("focus", () => showTooltip(cell, workout, entry));
-      cell.addEventListener("click", () => showTooltip(cell, workout, entry));
+      cell.addEventListener("focus", () => showTooltip(cell, entry));
+      cell.addEventListener("click", () => showTooltip(cell, entry));
     }
 
     grid.appendChild(cell);
@@ -103,16 +100,14 @@ async function init() {
   const grid = document.getElementById("calendar-grid");
 
   let history;
-  let workouts;
   try {
-    [history, workouts] = await Promise.all([apiFetch("/history"), apiFetch("/workouts/")]);
+    history = await apiFetch("/history");
   } catch (err) {
     grid.innerHTML = `<p class="error-message">${escapeHtml(err.message)}</p>`;
     return;
   }
 
   historyByDate = new Map(history.map((entry) => [entry.date, entry]));
-  workoutsByDay = new Map(workouts.map((w) => [w.day_of_week, w]));
 
   const now = new Date();
   viewYear = now.getFullYear();

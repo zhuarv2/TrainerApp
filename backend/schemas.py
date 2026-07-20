@@ -45,3 +45,6 @@ class HistoryResponse(BaseModel):
     date:Date
     completed:bool
     notes:str | None
+    workout_plan_id:int
+    workout_name:str
+    model_config = ConfigDict(from_attributes=True)

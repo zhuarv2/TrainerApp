@@ -42,5 +42,9 @@ class WorkoutHistory(Base):
     notes = Column(String, nullable=True)
     user = relationship('User', back_populates='workout_history')
     workout_plan = relationship('WorkoutPlan', back_populates='workout_history')
-    
+
+    @property
+    def workout_name(self):
+        return self.workout_plan.name
+
 Base.metadata.create_all(engine)

@@ -92,9 +92,10 @@ All routes except `/auth/register` and `/auth/login` require `Authorization: Bea
 | GET | `/history` | All completion records |
 | GET | `/history/{date}` | Completion records for a specific date (`YYYY-MM-DD`) |
 
+Each history record now includes `workout_plan_id` and `workout_name`, resolved from the actual workout that was marked complete — not guessed from the current weekly plan.
+
 ## Known limitations
 
-- A history record doesn't store *which* workout was completed — the frontend infers it by matching the entry's weekday against your *current* weekly plan, so the label can be wrong for a day if you've since reassigned that weekday.
 - No delete endpoint for workouts; a day's assignment can only be edited, not removed.
 - SQLite is used for local development. There's no production deployment configured yet.
 - Installing as a PWA (the browser's "Add to Home Screen" prompt) requires HTTPS — it works on `localhost` for local testing but will need TLS wherever this ends up deployed.
