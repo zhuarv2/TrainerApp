@@ -22,7 +22,7 @@ def update_wo(workout_id:int, workout:WorkoutUpdate):
 def get_today_wo():
     workout_plan = get_today_workout(user_id=1,)
     if workout_plan is None:
-        raise HTTPException(status_code=404, detail="Today's workout is not found")
+        raise HTTPException(status_code=404, detail="Today's workout not found")
     return workout_plan
 
 @router.get("/", response_model=list[WorkoutResponse])
@@ -33,6 +33,6 @@ def get_all_wo():
 def get_wo_by_id(workout_id:int):
     workout_plan_by_id = get_workout_by_id(user_id=1,workout_id=workout_id)
     if workout_plan_by_id is None:
-        raise HTTPException(status_code=404, detail="This day's workout is not found")
+        raise HTTPException(status_code=404, detail="This day's workout not found")
     return workout_plan_by_id
 
