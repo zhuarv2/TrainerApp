@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planner · TrainerApp</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="topnav">
+    <span class="brand">🏋️ TrainerApp</span>
+    <div class="nav-links">
+      <a href="dashboard.html">Today</a>
+      <a href="planner.html" class="active">Planner</a>
+      <a href="history.html">History</a>
+      <button id="logout-btn" class="link-btn">Logout</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Weekly Planner</h1>
+    <p class="hint">Assign one workout per day. Existing days can be edited but not removed.</p>
+    <div id="planner-grid" class="planner-grid">Loading…</div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/planner.js"></script>
+</body>
+</html>

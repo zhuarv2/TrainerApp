@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History · TrainerApp</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="topnav">
+    <span class="brand">🏋️ TrainerApp</span>
+    <div class="nav-links">
+      <a href="dashboard.html">Today</a>
+      <a href="planner.html">Planner</a>
+      <a href="history.html" class="active">History</a>
+      <button id="logout-btn" class="link-btn">Logout</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>History</h1>
+    <div class="table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Workout</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr><td colspan="3">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/history.js"></script>
+</body>
+</html>

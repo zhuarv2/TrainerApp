@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Today · TrainerApp</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="topnav">
+    <span class="brand">🏋️ TrainerApp</span>
+    <div class="nav-links">
+      <a href="dashboard.html" class="active">Today</a>
+      <a href="planner.html">Planner</a>
+      <a href="history.html">History</a>
+      <button id="logout-btn" class="link-btn">Logout</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Today &mdash; <span id="today-label"></span></h1>
+    <div id="workout-container" class="card">Loading…</div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
