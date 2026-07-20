@@ -4,7 +4,6 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 engine = create_engine('sqlite:///backend/database.db', echo=True)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
-session = Session()
 
 class User(Base):
     __tablename__ = 'users'

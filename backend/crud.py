@@ -1,10 +1,9 @@
-from fastapi import Depends
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from datetime import date
 from backend.models import User, WorkoutPlan, WorkoutExercise, WorkoutHistory
 from backend.database import SessionLocal
-from backend.auth import hash_password, verify_password, create_token_access, get_current_user
+from backend.auth import hash_password, verify_password, create_token_access
 from backend.schemas import UserCreate, UserLogin, WorkoutCreate, WorkoutUpdate, MarkWorkoutComplete
 
 def create_exercise_objects(exercises: list[str]) -> list[WorkoutExercise]:
@@ -58,12 +57,11 @@ def login_user(entered_user: UserLogin):
     finally:
         session.close()
 
-def create_workout(workout: WorkoutCreate, current_user:User=Depends(get_current_user)):
+def create_workout(user_id:int, workout: WorkoutCreate):
     session = SessionLocal()
     try:
-        current_user_id = current_user.id
         existing = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(
-            WorkoutPlan.user_id == current_user_id,
+            WorkoutPlan.user_id == user_id,
             WorkoutPlan.day_of_week == workout.day_of_week,
         ).first()
         if existing:
@@ -71,7 +69,7 @@ def create_workout(workout: WorkoutCreate, current_user:User=Depends(get_current
         exercise_objects = create_exercise_objects(workout.workout_exercises)
             
         workout_plan = WorkoutPlan(
-            user_id=current_user_id,
+            user_id=user_id,
             day_of_week=workout.day_of_week,
             name=workout.name,
             workout_exercises=exercise_objects)
@@ -85,18 +83,17 @@ def create_workout(workout: WorkoutCreate, current_user:User=Depends(get_current
     finally:
         session.close()
 
-def update_workout(workout_id:int, updated_workout: WorkoutUpdate, current_user:User=Depends(get_current_user)):
+def update_workout(user_id:int, workout_id:int, updated_workout: WorkoutUpdate):
     session = SessionLocal()
     try:
-        current_user_id = current_user.id
         existing = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(
-            WorkoutPlan.user_id == current_user_id,
+            WorkoutPlan.user_id == user_id,
             WorkoutPlan.day_of_week == updated_workout.day_of_week,
             WorkoutPlan.id != workout_id
         ).first()
         if existing:
             return None
-        workout = session.query(WorkoutPlan).filter(WorkoutPlan.user_id == current_user_id, WorkoutPlan.id==workout_id).first()
+        workout = session.query(WorkoutPlan).filter(WorkoutPlan.user_id == user_id, WorkoutPlan.id==workout_id).first()
         if workout is None:
             return None
         workout.day_of_week = updated_workout.day_of_week
@@ -113,12 +110,11 @@ def update_workout(workout_id:int, updated_workout: WorkoutUpdate, current_user:
     finally:
         session.close()
 
-def get_today_workout(current_user:User=Depends(get_current_user)):
+def get_today_workout(user_id:int):
     session = SessionLocal()
     try:
-        current_user_id = current_user.id
         today = date.today().strftime("%A")
-        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id == current_user_id, WorkoutPlan.day_of_week==today).first()
+        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id == user_id, WorkoutPlan.day_of_week==today).first()
         if workout_plan is None:
             return None
         return workout_plan
@@ -127,11 +123,10 @@ def get_today_workout(current_user:User=Depends(get_current_user)):
     finally:
         session.close()
 
-def get_all_workouts(current_user:User=Depends(get_current_user)):
+def get_all_workouts(user_id:int):
     session = SessionLocal()
     try:
-        current_user_id = current_user.id
-        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id==current_user_id).all()
+        workout_plan = session.query(WorkoutPlan).options(selectinload(WorkoutPlan.workout_exercises)).filter(WorkoutPlan.user_id==user_id).all()
         return workout_plan
     except Exception:
         raise
@@ -153,13 +148,19 @@ def get_workout_by_id(user_id:int,workout_id:int):
 def mark_completed(user_id:int, workout_id:int, marked_workout:MarkWorkoutComplete):
     session = SessionLocal()
     try:
+        workout = session.query(WorkoutPlan).filter(
+            WorkoutPlan.id == workout_id,
+            WorkoutPlan.user_id == user_id
+        ).first()
+        if workout is None:
+            return None
         existing = session.query(WorkoutHistory).filter(
             WorkoutHistory.user_id == user_id,
             WorkoutHistory.workout_plan_id == workout_id,
             WorkoutHistory.date == date.today()
         ).first()
         if existing:
-            return existing
+            return None
         history = WorkoutHistory(
             user_id=user_id,
             workout_plan_id=workout_id,
