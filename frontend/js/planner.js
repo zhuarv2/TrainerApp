@@ -33,7 +33,7 @@ function buildTabs() {
     btn.type = "button";
     btn.className = "day-tab";
     btn.dataset.day = day;
-    btn.innerHTML = `<span class="day-full">${day}</span><span class="day-short">${day.slice(0, 3)}</span>`;
+    btn.innerHTML = `<span class="day-full">${day}</span><span class="day-short">${day.slice(0, 3)}</span><span class="day-tiny">${day.slice(0, 1)}</span>`;
     btn.setAttribute("role", "tab");
     btn.setAttribute("aria-selected", String(day === selectedDay));
     if (day === selectedDay) btn.classList.add("active");

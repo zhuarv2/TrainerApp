@@ -141,6 +141,13 @@ document.addEventListener("DOMContentLoaded", () => {
         navToggle.setAttribute("aria-expanded", "false");
       });
     });
+    document.addEventListener("click", (event) => {
+      if (!navLinks.classList.contains("open")) return;
+      if (navLinks.contains(event.target) || navToggle.contains(event.target)) return;
+      navLinks.classList.remove("open");
+      navToggle.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+    });
   }
 
   const themeToggle = document.getElementById("theme-toggle");

@@ -409,7 +409,8 @@ button:disabled {
   border-color: var(--primary);
   color: var(--on-primary);
 }
-.day-tab .day-short {
+.day-tab .day-short,
+.day-tab .day-tiny {
   display: none;
 }
 .planner-content {
@@ -620,27 +621,39 @@ body.modal-open {
 @media (max-width: 640px) {
   .topnav {
     padding: 0.7rem 1rem;
+    justify-content: flex-end;
+  }
+
+  .topnav .brand {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .nav-toggle {
     display: flex;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .nav-links {
     position: fixed;
     top: 3.75rem;
-    right: 0;
+    left: 0;
     bottom: 0;
-    left: auto;
+    right: auto;
     width: min(75vw, 280px);
     flex-direction: column;
     align-items: flex-start;
     gap: 1.1rem;
     background: var(--surface);
-    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
     padding: 1.5rem;
-    box-shadow: -12px 0 24px rgba(36, 31, 26, 0.12);
-    transform: translateX(100%);
+    box-shadow: 12px 0 24px rgba(36, 31, 26, 0.12);
+    transform: translateX(-100%);
     pointer-events: none;
     transition: transform 0.25s ease;
     z-index: 40;
@@ -701,5 +714,14 @@ body.modal-open {
   }
   .modal {
     padding: 1.25rem;
+  }
+  .day-tab {
+    padding: 0.4rem 0;
+  }
+  .day-tab .day-short {
+    display: none;
+  }
+  .day-tab .day-tiny {
+    display: inline;
   }
 }
