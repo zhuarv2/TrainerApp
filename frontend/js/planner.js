@@ -1,25 +1,66 @@
 requireAuth();
 
+let byDay = {};
+let selectedDay = weekdayFromISO(todayISO());
+
 async function init() {
-  const grid = document.getElementById("planner-grid");
-  grid.innerHTML = "";
+  const content = document.getElementById("planner-content");
+  content.innerHTML = "Loading…";
 
   let workouts;
   try {
     workouts = await apiFetch("/workouts/");
   } catch (err) {
-    grid.innerHTML = `<p class="error-message">${escapeHtml(err.message)}</p>`;
+    content.innerHTML = `<p class="error-message">${escapeHtml(err.message)}</p>`;
     return;
   }
 
-  const byDay = {};
+  byDay = {};
   workouts.forEach((w) => {
     byDay[w.day_of_week] = w;
   });
 
+  buildTabs();
+  renderSelectedDay();
+}
+
+function buildTabs() {
+  const tabs = document.getElementById("day-tabs");
+  tabs.innerHTML = "";
+
   DAYS.forEach((day) => {
-    grid.appendChild(buildDayCard(day, byDay[day]));
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "day-tab";
+    btn.dataset.day = day;
+    btn.innerHTML = `<span class="day-full">${day}</span><span class="day-short">${day.slice(0, 3)}</span>`;
+    btn.setAttribute("role", "tab");
+    btn.setAttribute("aria-selected", String(day === selectedDay));
+    if (day === selectedDay) btn.classList.add("active");
+
+    btn.addEventListener("click", () => {
+      if (day === selectedDay) return;
+      selectedDay = day;
+      updateActiveTab();
+      renderSelectedDay();
+    });
+
+    tabs.appendChild(btn);
   });
+}
+
+function updateActiveTab() {
+  document.querySelectorAll(".day-tab").forEach((btn) => {
+    const isActive = btn.dataset.day === selectedDay;
+    btn.classList.toggle("active", isActive);
+    btn.setAttribute("aria-selected", String(isActive));
+  });
+}
+
+function renderSelectedDay() {
+  const content = document.getElementById("planner-content");
+  content.innerHTML = "";
+  content.appendChild(buildDayCard(selectedDay, byDay[selectedDay]));
 }
 
 function buildDayCard(day, workout) {
@@ -107,6 +148,7 @@ function renderFormMode(card, day, workout) {
           body: JSON.stringify(payload),
         });
       }
+      byDay[day] = saved;
       renderViewMode(card, day, saved);
     } catch (err) {
       errorEl.textContent = err.message;

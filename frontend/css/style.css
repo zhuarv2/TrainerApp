@@ -217,6 +217,8 @@ button {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.75rem 1.5rem 3rem;
+  min-width: 0;
+  width: 100%;
 }
 
 .hint {
@@ -378,10 +380,40 @@ button:disabled {
 }
 
 /* Planner */
-.planner-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
+.day-tabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.35rem;
+  -webkit-overflow-scrolling: touch;
+}
+.day-tab {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.day-tab:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+.day-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+.day-tab .day-short {
+  display: none;
+}
+.planner-content {
+  max-width: 480px;
 }
 .day-card {
   background: var(--surface);
@@ -595,25 +627,26 @@ body.modal-open {
   }
 
   .nav-links {
-    position: absolute;
-    top: 100%;
-    left: 0;
+    position: fixed;
+    top: 3.75rem;
     right: 0;
+    bottom: 0;
+    left: auto;
+    width: min(75vw, 280px);
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.9rem;
+    gap: 1.1rem;
     background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 1rem;
-    box-shadow: 0 12px 20px rgba(36, 31, 26, 0.08);
-    transform: translateY(-8px);
-    opacity: 0;
+    border-left: 1px solid var(--border);
+    padding: 1.5rem;
+    box-shadow: -12px 0 24px rgba(36, 31, 26, 0.12);
+    transform: translateX(100%);
     pointer-events: none;
-    transition: transform 0.25s ease, opacity 0.25s ease;
+    transition: transform 0.25s ease;
+    z-index: 40;
   }
   .nav-links.open {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateX(0);
     pointer-events: auto;
   }
 
@@ -632,8 +665,20 @@ body.modal-open {
     max-width: none;
     width: calc(100% - 2rem);
   }
-  .planner-grid {
-    grid-template-columns: 1fr;
+  .day-tabs {
+    gap: 0.35rem;
+  }
+  .day-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.4rem 0.3rem;
+    text-align: center;
+  }
+  .day-tab .day-full {
+    display: none;
+  }
+  .day-tab .day-short {
+    display: inline;
   }
   .day-card {
     padding: 1rem;
