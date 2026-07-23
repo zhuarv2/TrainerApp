@@ -24,9 +24,21 @@ jobs:
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ~/TrainerApp
+
+            echo "Pulling latest code..."
             git pull origin main
+
+            echo "Installing dependencies..."
             source venv/bin/activate
             pip install -r requirements.txt
+
+            echo "Updating frontend..."
+            sudo rm -rf /var/www/html/*
+            sudo cp -r frontend/* /var/www/html/
+
+            echo "Restarting backend..."
             sudo systemctl restart workout
+
+            echo "Reloading Nginx..."
             sudo systemctl reload nginx
           EOF
